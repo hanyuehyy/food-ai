@@ -1,0 +1,43 @@
+@import './variables.scss';
+
+page {
+  min-height: 100%;
+  background: $color-bg;
+  color: $color-text;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+view,
+text,
+button,
+input {
+  box-sizing: border-box;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  line-height: 1;
+  background: transparent;
+
+  &::after {
+    border: 0;
+  }
+}
+
+.page {
+  min-height: 100vh;
+  padding: 32rpx;
+}
+
+.section-title {
+  color: $color-text;
+  font-size: 36rpx;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.muted {
+  color: $color-muted;
+}

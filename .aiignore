@@ -1,0 +1,52 @@
+# dependencies
+node_modules/
+
+# build outputs
+dist/
+unpackage/
+.vite/
+.cache/
+coverage/
+
+# design source files
+design-source/
+*.pen
+*.fig
+*.sketch
+*.xd
+
+# generated design/code export files
+design-source/**/*.html
+*.svg
+*.map
+*.pdf
+*.zip
+*.mp4
+*.mov
+
+# image assets
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.ico
+
+# docs and data should not be read by default
+docs/
+data/
+
+# backups
+archive/
+backup/
+.history/
+old/
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# private local config
+project.private.config.json

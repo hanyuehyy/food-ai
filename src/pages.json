@@ -1,0 +1,36 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "食材小查",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/ingredient-library/index",
+      "style": {
+        "navigationBarTitleText": "食材库"
+      }
+    },
+    {
+      "path": "pages/ingredient-detail/index",
+      "style": {
+        "navigationBarTitleText": "食材详情",
+        "navigationStyle": "custom"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "食材小查",
+    "navigationBarBackgroundColor": "#faf7f2",
+    "backgroundColor": "#faf7f2"
+  },
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^wd-(.*)": "wot-design-uni/components/wd-$1/wd-$1.vue"
+    }
+  }
+}

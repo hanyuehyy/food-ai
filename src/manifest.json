@@ -1,0 +1,26 @@
+{
+  "name": "食材小查",
+  "appid": "__UNI__FOODCHECK",
+  "description": "食材小查 MVP 微信小程序",
+  "versionName": "0.1.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "mp-weixin": {
+    "appid": "touristappid",
+    "setting": {
+      "urlCheck": true,
+      "es6": true,
+      "postcss": true,
+      "minified": true
+    },
+    "permission": {
+      "scope.userLocation": {
+        "desc": "用于根据你所在地区展示本月当季食材"
+      }
+    },
+    "requiredPrivateInfos": [
+      "chooseLocation"
+    ],
+    "usingComponents": {}
+  }
+}
