@@ -30,9 +30,7 @@ design-reference/
 *.ico
 
 # 例外：README 截图
-!docs/
-docs/*
-!docs/images/
+!docs/images/*.png
 
 # 文档（本地）
 data/
