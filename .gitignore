@@ -47,10 +47,17 @@ old/
 # 微信开发者工具
 project.private.config.json
 
+# 云开发配置
+cloudbaserc.json
+
+# 敏感数据脚本
+scripts/
+
 # Claude/IDE 配置
 .claude/
 .aiignore
 AGENTS.md
+CLAUDE.md
 
 # 日志
 *.log

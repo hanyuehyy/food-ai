@@ -125,7 +125,8 @@ food-ai/
 配置文件位置：`src/config/cloud.ts`
 
 ```typescript
-export const CLOUD_ENV_ID = 'cloud1-4g4br868e4d093c0'  // 替换为你的环境 ID
+// 在 src/config/cloud.ts 中配置
+export const CLOUD_ENV_ID = 'your-cloud-env-id'  // 替换为你的环境 ID
 ```
 
 ### 云数据库集合

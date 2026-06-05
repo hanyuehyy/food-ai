@@ -12,7 +12,7 @@
 - **样式**: SCSS，单位 rpx
 
 **AppID**: `wxcadf76a84943b5cc`
-**云环境 ID**: `cloud1-4g4br868e4d093c0`
+**云环境 ID**: 配置在 `src/config/cloud.ts` 中
 
 ## 构建与运行
 
