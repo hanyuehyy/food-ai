@@ -26,8 +26,26 @@ function fail(code, message, data = null) {
   }
 }
 
+const IMAGE_NAME_OVERRIDES = {
+  spring_bamboo_shoots: 'food-spring-bamboo-shoot.png',
+  winter_bamboo_shoots: 'food-winter-bamboo-shoot.png',
+  shepherd_purse: 'food-shepherds-purse.png',
+  goji_shoots: 'food-goji-leaves.png',
+  broad_bean: 'food-broad-beans.png',
+  green_pea: 'food-peas.png',
+  waxberry: 'food-bayberry.png',
+  grape: 'food-grapes.png',
+  white_radish: 'food-daikon-radish.png',
+  chinese_cabbage: 'food-napa-cabbage.png',
+  mandarin: 'food-sugar-orange.png',
+  plain_yogurt: 'food-yogurt-unsweetened.png',
+  wax_gourd: 'food-winter-melon.png',
+  soy_milk: 'food-soymilk.png',
+  white_mushroom: 'food-white-mushroom.jpg'
+}
+
 function buildImageFields(ingredientId) {
-  const imageName = `food-${ingredientId}.png`
+  const imageName = IMAGE_NAME_OVERRIDES[ingredientId] || `food-${ingredientId.replace(/_/g, '-')}.png`
 
   return {
     imageName,

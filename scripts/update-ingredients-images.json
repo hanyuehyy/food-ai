@@ -1,0 +1,7 @@
+{
+  "collectionName": "ingredients",
+  "mode": "upsert",
+  "data": [
+    {"ingredientId": "white_mushroom", "imageName": "food-white-mushroom.jpg", "imageFileId": "cloud://cloud1-4g4br868e4d093c0.636c-cloud1-4g4br868e4d093c0-1320667469/food-white-mushroom.jpg"}
+  ]
+}

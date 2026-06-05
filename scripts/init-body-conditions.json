@@ -1,0 +1,4 @@
+{"conditionId":"poor_appetite","conditionName":"食欲不振","priority":"P0","iconFileId":"","userDescription":"没胃口、吃不下饭、消化不良","status":"published","sortOrder":1}
+{"conditionId":"dry_heat","conditionName":"口干上火","priority":"P0","iconFileId":"","userDescription":"口干舌燥、咽喉不适、容易上火","status":"published","sortOrder":2}
+{"conditionId":"bowel_slow","conditionName":"排便不畅","priority":"P0","iconFileId":"","userDescription":"排便困难、大便干燥、肠道不通畅","status":"published","sortOrder":3}
+{"conditionId":"sugar_watch","conditionName":"血糖偏高","priority":"P0","iconFileId":"","userDescription":"需要关注血糖、控制碳水摄入","status":"published","sortOrder":4}

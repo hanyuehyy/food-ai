@@ -13,7 +13,8 @@ const ALLOWED_COLLECTIONS = [
   'ingredient_pairings',
   'knowledge_sources',
   'tag_dicts',
-  'system_configs'
+  'system_configs',
+  'monthly_seasonal_rules'
 ]
 
 const BUSINESS_KEYS = {
@@ -23,7 +24,8 @@ const BUSINESS_KEYS = {
   ingredient_pairings: ['pairingId'],
   knowledge_sources: ['sourceId'],
   tag_dicts: ['tagId', 'tagType'],
-  system_configs: ['configKey']
+  system_configs: ['configKey'],
+  monthly_seasonal_rules: ['id']
 }
 
 function success(data) {
@@ -124,8 +126,17 @@ exports.main = async (event = {}) => {
       const existed = await collection.where(buildWhere(collectionName, item)).limit(1).get()
 
       if (existed.data.length > 0) {
+        // 使用 $set 操作符来支持部分更新，特别是对 null 字段的更新
+        const updateData = {}
+        Object.keys(item).forEach(key => {
+          if (key !== 'ingredientId' && key !== '_id') {
+            updateData[key] = item[key]
+          }
+        })
         await collection.doc(existed.data[0]._id).update({
-          data: item
+          data: {
+            $set: updateData
+          }
         })
         result.updated += 1
       } else {

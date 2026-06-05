@@ -1,0 +1,226 @@
+{
+  "collectionName": "ingredients",
+  "mode": "upsert",
+  "data": [
+    {
+      "ingredientId": "white_mushroom",
+      "nutrition": {
+        "unit": "每100g可食部",
+        "energyKcal": 24,
+        "protein": 2.7,
+        "fat": 0.4,
+        "carbohydrate": 4.1,
+        "fiber": 1.6,
+        "calcium": 6,
+        "iron": 0.5,
+        "zinc": 0.4,
+        "potassium": 318,
+        "magnesium": 9,
+        "vitaminA": null,
+        "vitaminB1": 0.04,
+        "vitaminB2": 0.35,
+        "vitaminC": null,
+        "giValue": null,
+        "sourceId": "source_cn_food_composition"
+      }
+    },
+    {
+      "ingredientId": "oyster_mushroom",
+      "nutrition": {
+        "unit": "每100g可食部",
+        "energyKcal": 22,
+        "protein": 1.9,
+        "fat": 0.3,
+        "carbohydrate": 4.6,
+        "fiber": 2.3,
+        "calcium": 3,
+        "iron": 0.4,
+        "zinc": 0.3,
+        "potassium": 258,
+        "magnesium": 10,
+        "vitaminA": null,
+        "vitaminB1": 0.06,
+        "vitaminB2": 0.16,
+        "vitaminC": null,
+        "giValue": null,
+        "sourceId": "source_cn_food_composition"
+      }
+    },
+    {
+      "ingredientId": "cordyceps_flower",
+      "nutrition": {
+        "unit": "每100g可食部",
+        "energyKcal": 28,
+        "protein": 2.2,
+        "fat": 0.5,
+        "carbohydrate": 5.2,
+        "fiber": 1.8,
+        "calcium": 5,
+        "iron": 0.8,
+        "zinc": 0.5,
+        "potassium": 220,
+        "magnesium": 8,
+        "vitaminA": null,
+        "vitaminB1": 0.05,
+        "vitaminB2": 0.2,
+        "vitaminC": null,
+        "giValue": null,
+        "sourceId": "source_cn_food_composition"
+      }
+    },
+    {
+      "ingredientId": "white_beech_mushroom",
+      "nutrition": {
+        "unit": "每100g可食部",
+        "energyKcal": 18,
+        "protein": 1.8,
+        "fat": 0.3,
+        "carbohydrate": 3.2,
+        "fiber": 2.0,
+        "calcium": 4,
+        "iron": 0.3,
+        "zinc": 0.3,
+        "potassium": 280,
+        "magnesium": 8,
+        "vitaminA": null,
+        "vitaminB1": 0.04,
+        "vitaminB2": 0.12,
+        "vitaminC": null,
+        "giValue": null,
+        "sourceId": "source_cn_food_composition"
+      }
+    },
+    {
+      "ingredientId": "phoenix_oyster_mushroom",
+      "nutrition": {
+        "unit": "每100g可食部",
+        "energyKcal": 20,
+        "protein": 2.0,
+        "fat": 0.3,
+        "carbohydrate": 4.0,
+        "fiber": 2.1,
+        "calcium": 4,
+        "iron": 0.4,
+        "zinc": 0.4,
+        "potassium": 260,
+        "magnesium": 9,
+        "vitaminA": null,
+        "vitaminB1": 0.05,
+        "vitaminB2": 0.15,
+        "vitaminC": null,
+        "giValue": null,
+        "sourceId": "source_cn_food_composition"
+      }
+    },
+    {
+      "ingredientId": "tea_tree_mushroom",
+      "nutrition": {
+        "unit": "每100g可食部",
+        "energyKcal": 27,
+        "protein": 2.5,
+        "fat": 0.4,
+        "carbohydrate": 5.0,
+        "fiber": 2.8,
+        "calcium": 6,
+        "iron": 0.6,
+        "zinc": 0.5,
+        "potassium": 240,
+        "magnesium": 10,
+        "vitaminA": null,
+        "vitaminB1": 0.06,
+        "vitaminB2": 0.18,
+        "vitaminC": null,
+        "giValue": null,
+        "sourceId": "source_cn_food_composition"
+      }
+    },
+    {
+      "ingredientId": "bamboo_fungus",
+      "nutrition": {
+        "unit": "每100g可食部",
+        "energyKcal": 22,
+        "protein": 2.0,
+        "fat": 0.3,
+        "carbohydrate": 4.5,
+        "fiber": 3.0,
+        "calcium": 8,
+        "iron": 0.5,
+        "zinc": 0.4,
+        "potassium": 200,
+        "magnesium": 7,
+        "vitaminA": null,
+        "vitaminB1": 0.04,
+        "vitaminB2": 0.14,
+        "vitaminC": null,
+        "giValue": null,
+        "sourceId": "source_cn_food_composition"
+      }
+    },
+    {
+      "ingredientId": "zucchini",
+      "nutrition": {
+        "unit": "每100g可食部",
+        "energyKcal": 15,
+        "protein": 0.7,
+        "fat": 0.2,
+        "carbohydrate": 3.1,
+        "fiber": 0.9,
+        "calcium": 10,
+        "iron": 0.3,
+        "zinc": 0.2,
+        "potassium": 132,
+        "magnesium": 9,
+        "vitaminA": 5,
+        "vitaminB1": 0.02,
+        "vitaminB2": 0.03,
+        "vitaminC": 8,
+        "giValue": null,
+        "sourceId": "source_cn_food_composition"
+      }
+    },
+    {
+      "ingredientId": "eggplant",
+      "nutrition": {
+        "unit": "每100g可食部",
+        "energyKcal": 25,
+        "protein": 1.0,
+        "fat": 0.2,
+        "carbohydrate": 5.7,
+        "fiber": 1.9,
+        "calcium": 12,
+        "iron": 0.4,
+        "zinc": 0.2,
+        "potassium": 162,
+        "magnesium": 12,
+        "vitaminA": 6,
+        "vitaminB1": 0.03,
+        "vitaminB2": 0.03,
+        "vitaminC": 4,
+        "giValue": null,
+        "sourceId": "source_cn_food_composition"
+      }
+    },
+    {
+      "ingredientId": "chayote",
+      "nutrition": {
+        "unit": "每100g可食部",
+        "energyKcal": 16,
+        "protein": 0.6,
+        "fat": 0.1,
+        "carbohydrate": 3.7,
+        "fiber": 1.2,
+        "calcium": 10,
+        "iron": 0.2,
+        "zinc": 0.2,
+        "potassium": 125,
+        "magnesium": 8,
+        "vitaminA": null,
+        "vitaminB1": 0.02,
+        "vitaminB2": 0.03,
+        "vitaminC": 10,
+        "giValue": null,
+        "sourceId": "source_cn_food_composition"
+      }
+    }
+  ]
+}

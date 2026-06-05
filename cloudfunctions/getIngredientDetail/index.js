@@ -1,4 +1,5 @@
 const cloud = require('wx-server-sdk')
+const { success, fail, resolveIngredientImageUrls } = require('./utils')
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV
@@ -7,24 +8,6 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
-function success(data) {
-  return {
-    success: true,
-    code: 0,
-    message: 'success',
-    data
-  }
-}
-
-function fail(code, message, data = null) {
-  return {
-    success: false,
-    code,
-    message,
-    data
-  }
-}
-
 function uniq(values) {
   return [...new Set(values.filter(Boolean))]
 }
@@ -32,69 +15,6 @@ function uniq(values) {
 function pickIngredientInitial(id, ingredientMap) {
   const ingredient = ingredientMap[id]
   return ingredient ? ingredient.name.slice(0, 1) : ''
-}
-
-function getCloudImageFileId(item) {
-  const sources = [item.imageFileId, item.imageUrl]
-
-  for (const source of sources) {
-    const fileId = (source || '').trim()
-    if (fileId.startsWith('cloud://')) {
-      return fileId
-    }
-  }
-
-  return ''
-}
-
-function getDirectImageUrl(item) {
-  const imageUrl = (item.imageUrl || '').trim()
-  return imageUrl && !imageUrl.startsWith('cloud://') ? imageUrl : ''
-}
-
-async function resolveIngredientImageUrls(ingredients) {
-  const cloudFileIds = [
-    ...new Set(
-      ingredients
-        .map((item) => getCloudImageFileId(item))
-        .filter(Boolean)
-    )
-  ]
-
-  const tempUrlMap = {}
-
-  if (cloudFileIds.length) {
-    try {
-      const res = await cloud.getTempFileURL({
-        fileList: cloudFileIds
-      })
-
-      ;(res.fileList || []).forEach((file, index) => {
-        if (file.status === 0 && file.tempFileURL) {
-          tempUrlMap[file.fileID || cloudFileIds[index]] = file.tempFileURL
-          tempUrlMap[cloudFileIds[index]] = file.tempFileURL
-        } else {
-          console.warn('[getIngredientDetail] resolve image temp url failed', {
-            fileID: file.fileID || cloudFileIds[index],
-            status: file.status,
-            errMsg: file.errMsg
-          })
-        }
-      })
-    } catch (error) {
-      console.error('[getIngredientDetail] getTempFileURL failed', error)
-    }
-  }
-
-  return ingredients.map((item) => {
-    const directImageUrl = getDirectImageUrl(item)
-    const cloudFileId = getCloudImageFileId(item)
-
-    return {
-      ...item,
-      imageUrl: directImageUrl || tempUrlMap[cloudFileId] || ''
-    }
-  })
 }
 
 exports.main = async (event = {}) => {
@@ -121,7 +41,6 @@ exports.main = async (event = {}) => {
     const suitableConditionIds = Array.isArray(ingredient.suitableConditionIds)
       ? ingredient.suitableConditionIds
       : []
-    const pairingIds = Array.isArray(ingredient.pairingIds) ? ingredient.pairingIds : []
     const sourceIds = Array.isArray(ingredient.sourceIds) ? ingredient.sourceIds : []
 
     const [conditionsRes, pairingsRes, sourcesRes] = await Promise.all([
@@ -140,24 +59,22 @@ exports.main = async (event = {}) => {
           })
           .get()
         : Promise.resolve({ data: [] }),
-      pairingIds.length
-        ? db.collection('ingredient_pairings')
-          .where({
-            pairingId: _.in(pairingIds),
-            status: 'published'
-          })
-          .field({
-            pairingId: true,
-            pairingName: true,
-            ingredientIds: true,
-            suitableConditionIds: true,
-            pairingReason: true,
-            cookingMethod: true,
-            cookingTime: true,
-            sortOrder: true
-          })
-          .get()
-        : Promise.resolve({ data: [] }),
+      db.collection('ingredient_pairings')
+        .where({
+          ingredientIds: ingredientId,
+          status: 'published'
+        })
+        .field({
+          pairingId: true,
+          pairingName: true,
+          ingredientIds: true,
+          suitableConditionIds: true,
+          pairingReason: true,
+          cookingMethod: true,
+          cookingTime: true,
+          sortOrder: true
+        })
+        .get(),
       sourceIds.length
         ? db.collection('knowledge_sources')
           .where({

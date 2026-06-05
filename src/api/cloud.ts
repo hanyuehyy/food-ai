@@ -1,10 +1,13 @@
 import { CLOUD_FUNCTIONS } from '@/config/cloud'
 import type {
   CloudResponse,
+  IngredientCategoriesData,
   IngredientDetailData,
   HomeData,
   IngredientListData,
-  IngredientListQuery
+  IngredientListQuery,
+  AnalyticsEvent,
+  LogAnalyticsEventData
 } from '@/types/cloud'
 
 type CloudFunctionName = keyof typeof CLOUD_FUNCTIONS
@@ -39,10 +42,18 @@ export function getHomeDataByProvince(province?: string) {
   return callCloudFunction<HomeData>('getHomeData', { province })
 }
 
+export function getIngredientCategories() {
+  return callCloudFunction<IngredientCategoriesData>('getIngredientCategories')
+}
+
 export function getIngredientList(query: IngredientListQuery = {}) {
   return callCloudFunction<IngredientListData>('getIngredientList', { ...query })
 }
 
 export function getIngredientDetail(ingredientId: string) {
   return callCloudFunction<IngredientDetailData>('getIngredientDetail', { ingredientId })
+}
+
+export function logAnalyticsEvents(sessionId: string, events: AnalyticsEvent[]) {
+  return callCloudFunction<LogAnalyticsEventData>('logAnalyticsEvent', { sessionId, events })
 }

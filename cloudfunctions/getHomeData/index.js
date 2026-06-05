@@ -1,4 +1,5 @@
 const cloud = require('wx-server-sdk')
+const { success, fail, resolveIngredientImageUrls } = require('./utils')
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV
@@ -7,22 +8,26 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
-function success(data) {
-  return {
-    success: true,
-    code: 0,
-    message: 'success',
-    data
-  }
+const IMAGE_FILE_ID_PREFIX = 'cloud://cloud1-4g4br868e4d093c0.636c-cloud1-4g4br868e4d093c0-1320667469'
+const IMAGE_NAME_OVERRIDES = {
+  spring_bamboo_shoots: 'food-spring-bamboo-shoot.png',
+  winter_bamboo_shoots: 'food-winter-bamboo-shoot.png',
+  shepherd_purse: 'food-shepherds-purse.png',
+  goji_shoots: 'food-goji-leaves.png',
+  broad_bean: 'food-broad-beans.png',
+  pea: 'food-peas.png',
+  green_pea: 'food-peas.png',
+  waxberry: 'food-bayberry.png',
+  grape: 'food-grapes.png',
+  white_radish: 'food-daikon-radish.png',
+  chinese_cabbage: 'food-napa-cabbage.png',
+  mandarin: 'food-sugar-orange.png',
+  white_mushroom: 'food-white-mushroom.jpg'
 }
 
-function fail(code, message, data = null) {
-  return {
-    success: false,
-    code,
-    message,
-    data
-  }
+function buildFallbackImageFileId(ingredientId) {
+  const imageName = IMAGE_NAME_OVERRIDES[ingredientId] || `food-${ingredientId.replace(/_/g, '-')}.png`
+  return `${IMAGE_FILE_ID_PREFIX}/${imageName}`
 }
 
 function getConfigValue(configs, key, fallback) {
@@ -44,73 +49,6 @@ function normalizeProvinceName(provinceName) {
 
 function getCurrentMonth() {
   return new Date().getMonth() + 1
-}
-
-function getCloudImageFileId(item) {
-  const sources = [item.imageFileId, item.imageUrl]
-
-  for (const source of sources) {
-    const fileId = (source || '').trim()
-    if (fileId.startsWith('cloud://')) {
-      return fileId
-    }
-  }
-
-  return ''
-}
-
-function getDirectImageUrl(item) {
-  const imageUrl = (item.imageUrl || '').trim()
-  return imageUrl && !imageUrl.startsWith('cloud://') ? imageUrl : ''
-}
-
-async function resolveIngredientImageUrls(ingredients) {
-  const cloudFileIds = [
-    ...new Set(
-      ingredients
-        .map((item) => getCloudImageFileId(item))
-        .filter(Boolean)
-    )
-  ]
-
-  if (!cloudFileIds.length) {
-    return ingredients.map((item) => ({
-      ...item,
-      imageUrl: getDirectImageUrl(item)
-    }))
-  }
-
-  const tempUrlMap = {}
-
-  try {
-    const res = await cloud.getTempFileURL({
-      fileList: cloudFileIds
-    })
-
-    ;(res.fileList || []).forEach((file, index) => {
-      if (file.status === 0 && file.tempFileURL) {
-        tempUrlMap[file.fileID || cloudFileIds[index]] = file.tempFileURL
-      } else {
-        console.warn('[getHomeData] resolve image temp url failed', {
-          fileID: file.fileID || cloudFileIds[index],
-          status: file.status,
-          errMsg: file.errMsg
-        })
-      }
-    })
-  } catch (error) {
-    console.error('[getHomeData] getTempFileURL failed', error)
-  }
-
-  return ingredients.map((item) => {
-    const directImageUrl = getDirectImageUrl(item)
-    const cloudFileId = getCloudImageFileId(item)
-
-    return {
-      ...item,
-      imageUrl: directImageUrl || tempUrlMap[cloudFileId] || ''
-    }
-  })
 }
 
 async function getRegionByProvince(province) {
@@ -160,8 +98,6 @@ async function getMonthlySeasonalData(province) {
       .field({
         ingredientId: true,
         name: true,
-        imageUrl: true,
-        imageFileId: true,
         seasonTag: true,
         displayReason: true,
         seasonalityLevel: true,
@@ -192,19 +128,45 @@ async function getMonthlySeasonalData(province) {
       return null
     }
 
-    const list = await resolveIngredientImageUrls(sortedRules)
+    const ingredientIds = sortedRules.map((r) => r.ingredientId).filter(Boolean)
+    const ingredientMap = {}
+
+    if (ingredientIds.length) {
+      const ingredientsRes = await db.collection('ingredients')
+        .where({
+          ingredientId: _.in(ingredientIds),
+          status: 'published'
+        })
+        .field({
+          ingredientId: true,
+          imageFileId: true
+        })
+        .get()
+
+      ingredientsRes.data.forEach((item) => {
+        ingredientMap[item.ingredientId] = item
+      })
+    }
+
+    const rawList = sortedRules.map((rule) => {
+      const ingredient = ingredientMap[rule.ingredientId] || {}
+
+      return {
+        ingredientId: rule.ingredientId,
+        name: rule.name || rule.ingredientId,
+        imageUrl: '',
+        imageFileId: ingredient.imageFileId || buildFallbackImageFileId(rule.ingredientId),
+        seasonTag: rule.seasonTag,
+        displayReason: rule.displayReason
+      }
+    })
+
+    const list = await resolveIngredientImageUrls(rawList)
 
     return {
       ...region,
       month,
-      list: list.map((item) => ({
-        ingredientId: item.ingredientId,
-        name: item.name,
-        imageUrl: item.imageUrl || '',
-        imageFileId: item.imageFileId || '',
-        seasonTag: item.seasonTag,
-        displayReason: item.displayReason
-      })),
+      list,
       disclaimer: '推荐仅供日常饮食参考，具体上市时间会因地区、气候和市场供应情况略有差异。'
     }
   } catch (error) {

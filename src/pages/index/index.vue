@@ -5,6 +5,7 @@ import { getHomeDataByProvince } from '@/api/cloud'
 import AppTabBar from '@/components/layout/AppTabBar.vue'
 import type { HomeData, MonthlySeasonalIngredient } from '@/types/cloud'
 import { resolveCloudImageSources } from '@/utils/cloud-image'
+import { trackEvent, setupAnalyticsLifecycle } from '@/utils/analytics'
 
 interface SelectedLocation {
   name?: string
@@ -34,12 +35,10 @@ const locationLoading = ref(false)
 const currentProvince = ref('')
 const LOCATION_CACHE_KEY = 'userGeoLocation'
 
-const visibleConditions = computed(() => homeData.value.conditions.slice(0, 6))
-const firstPairing = computed(() => homeData.value.recommendPairings[0])
+const visibleConditions = computed(() => homeData.value.conditions.slice(0, 4))
 const monthlySeasonal = computed(() => homeData.value.monthlySeasonal)
 const monthlySeasonalIngredients = computed(() => monthlySeasonal.value?.list || [])
 const homeMonthlySeasonalIngredients = computed(() => monthlySeasonalIngredients.value.slice(0, 4))
-const popupMonthlySeasonalIngredients = computed(() => monthlySeasonalIngredients.value.slice(0, 6))
 const hasMonthlySeasonal = computed(() => homeMonthlySeasonalIngredients.value.length > 0)
 const monthlySeasonalSubtitle = computed(() => {
   if (!monthlySeasonal.value) {
@@ -88,13 +87,32 @@ async function loadHomeData() {
   }
 }
 
-function goDetail(ingredientId: string) {
+function goDetail(ingredientId: string, ingredientName?: string) {
   if (!ingredientId) {
     return
   }
 
+  trackEvent('home_seasonal_click', { ingredientId, ingredientName: ingredientName || '' })
   uni.navigateTo({
     url: `/pages/ingredient-detail/index?ingredientId=${encodeURIComponent(ingredientId)}`
+  })
+}
+
+function goSearch() {
+  trackEvent('home_search_click')
+  uni.navigateTo({
+    url: '/pages/ingredient-library/index'
+  })
+}
+
+function goConditionDetail(condition: { conditionId: string; conditionName: string }) {
+  if (!condition.conditionId) {
+    return
+  }
+
+  trackEvent('home_condition_click', { conditionId: condition.conditionId, conditionName: condition.conditionName })
+  uni.navigateTo({
+    url: `/pages/ingredient-library/index?conditionId=${encodeURIComponent(condition.conditionId)}&conditionName=${encodeURIComponent(condition.conditionName)}`
   })
 }
 
@@ -174,6 +192,7 @@ function chooseCurrentLocation(reloadOnFail = false) {
 
       cacheProvince(province, selectedLocation)
       currentProvince.value = province
+      trackEvent('home_location_set', { province })
       loadHomeData()
     },
     fail: () => {
@@ -193,26 +212,6 @@ function chooseCurrentLocation(reloadOnFail = false) {
 
 function handleLocationButtonClick() {
   chooseCurrentLocation()
-}
-
-function askLocationOnEntry() {
-  uni.showModal({
-    title: '获取当前位置',
-    content: '食材小查会根据你所在地区展示本月当季食材。',
-    confirmText: '去选择',
-    cancelText: '暂不',
-    success: (res) => {
-      if (res.confirm) {
-        chooseCurrentLocation(true)
-        return
-      }
-
-      loadHomeData()
-    },
-    fail: () => {
-      loadHomeData()
-    }
-  })
 }
 
 function showMonthlySeasonalPopup() {
@@ -242,7 +241,8 @@ async function resolveSeasonImages(list: MonthlySeasonalIngredient[]) {
   seasonImageErrors.value = {}
 
   try {
-    seasonImageSources.value = await resolveCloudImageSources(list)
+    const sources = await resolveCloudImageSources(list)
+    seasonImageSources.value = sources
   } catch (error) {
     console.warn('[home] resolve season images failed', error)
     seasonImageSources.value = {}
@@ -254,14 +254,11 @@ function retryLoad() {
 }
 
 onLoad(() => {
+  setupAnalyticsLifecycle()
   updateTopInset()
   currentProvince.value = getCachedProvince()
-  if (currentProvince.value) {
-    loadHomeData()
-    return
-  }
-
-  askLocationOnEntry()
+  trackEvent('page_view', { page: 'home', province: currentProvince.value || '' })
+  loadHomeData()
 })
 </script>
 
@@ -271,21 +268,23 @@ onLoad(() => {
       <view class="header">
         <view class="title-row">
           <text class="page-title">食材小查</text>
-          <view class="tagline">
-            <wd-icon name="check-circle" size="30rpx" />
-            <text>轻松查食材</text>
-          </view>
+        </view>
+        <view class="tagline">
+          <wd-icon name="check-circle" size="30rpx" />
+          <text>轻松查食材</text>
         </view>
 
-        <view class="search-box">
+        <view class="search-box" @click="goSearch">
           <wd-icon custom-class="search-icon" name="search" size="44rpx" />
           <text class="search-placeholder">{{ homeData.configs.searchPlaceholder }}</text>
         </view>
       </view>
 
-      <view v-if="loading" class="state-panel">
-        <wd-loading color="#57a867" />
-        <text>正在加载...</text>
+      <view v-if="loading" class="skeleton-wrap">
+        <wd-skeleton :row-col="[{ height: '80rpx', width: '40%' }]" animation="gradient" />
+        <wd-skeleton :row-col="[{ height: '108rpx', borderRadius: '40rpx' }]" animation="gradient" />
+        <wd-skeleton :row-col="[{ height: '48rpx', width: '50%', marginBottom: '24rpx' }, [1, 1], [1, 1]]" animation="gradient" />
+        <wd-skeleton theme="image" :row-col="[{ height: '48rpx', width: '50%', marginBottom: '24rpx' }, [{ width: '100%', height: '220rpx' }], [{ width: '100%', height: '220rpx' }]]" animation="gradient" />
       </view>
 
       <view v-else-if="errorMessage" class="state-panel">
@@ -303,6 +302,7 @@ onLoad(() => {
               :key="condition.conditionId"
               class="chip"
               :class="`chip-${chipStyles[index % chipStyles.length]}`"
+              @click="goConditionDetail(condition)"
             >
               <wd-icon
                 :name="chipIcons[index % chipIcons.length]"
@@ -313,28 +313,20 @@ onLoad(() => {
           </view>
         </view>
 
-        <view class="combo-section">
-          <text class="section-title">食材组合建议</text>
-
-          <view class="combo-card">
-            <view class="combo-copy">
-              <text class="combo-title">{{ firstPairing?.pairingName || '选择 1-3 个食材' }}</text>
-              <text class="combo-desc">{{ firstPairing?.pairingReason || '查看常见搭配' }}</text>
-              <button class="combo-button" type="button">
-                <text>去看看</text>
-                <wd-icon name="arrow-right" size="28rpx" />
-              </button>
+        <view v-if="!currentProvince" class="season-section season-section--cta">
+          <view class="season-title-row">
+            <view class="season-title">
+              <text class="season-heading">本月正当季</text>
+              <view class="green-dot"></view>
             </view>
-
-            <image
-              class="combo-image"
-              mode="aspectFit"
-              src="/static/images/combo-ingredients.png"
-            />
           </view>
+          <button class="season-cta-button" type="button" @click="handleLocationButtonClick">
+            <wd-icon name="location" size="32rpx" />
+            <text>{{ locationLoading ? '定位中...' : '点击获取位置，获取本月当季食材信息' }}</text>
+          </button>
         </view>
 
-        <view v-if="hasMonthlySeasonal" class="season-section">
+        <view v-else-if="hasMonthlySeasonal" class="season-section">
           <view class="season-title-row">
             <view class="season-title">
               <text class="season-heading">本月正当季</text>
@@ -362,7 +354,7 @@ onLoad(() => {
               v-for="ingredient in homeMonthlySeasonalIngredients"
               :key="ingredient.ingredientId"
               class="food-card"
-              @click="goDetail(ingredient.ingredientId)"
+              @click="goDetail(ingredient.ingredientId, ingredient.name)"
             >
               <image
                 v-if="getSeasonImage(ingredient)"
@@ -408,12 +400,17 @@ onLoad(() => {
           </button>
         </view>
 
+        <view class="popup-disclaimer">
+          <wd-icon name="info-circle" size="24rpx" />
+          <text>{{ monthlySeasonal.disclaimer }}</text>
+        </view>
+
         <scroll-view class="popup-list" scroll-y>
           <view
-            v-for="ingredient in popupMonthlySeasonalIngredients"
+            v-for="ingredient in monthlySeasonalIngredients"
             :key="ingredient.ingredientId"
             class="popup-item"
-            @click="goDetail(ingredient.ingredientId)"
+            @click="goDetail(ingredient.ingredientId, ingredient.name)"
           >
             <image
               v-if="getSeasonImage(ingredient)"
@@ -433,8 +430,6 @@ onLoad(() => {
             <wd-icon name="chevron-right" size="30rpx" />
           </view>
         </scroll-view>
-
-        <text class="popup-disclaimer">{{ monthlySeasonal.disclaimer }}</text>
       </view>
     </view>
   </view>
@@ -448,8 +443,8 @@ onLoad(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #faf7f2;
-  color: #243127;
+  background: $color-bg;
+  color: $color-text;
 }
 
 .app-content {
@@ -480,17 +475,17 @@ onLoad(() => {
 .title-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
 .page-title {
-  color: #243127;
+  color: $color-text;
   font-size: 50rpx;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .tagline {
+  margin-top: -8rpx;
   padding: 14rpx 20rpx;
   display: flex;
   align-items: center;
@@ -498,13 +493,13 @@ onLoad(() => {
   border: 1rpx solid #ede5d9;
   border-radius: 999rpx;
   background: rgba(255, 255, 255, 0.6);
-  color: #75806f;
+  color: $color-muted;
   font-size: 24rpx;
   font-weight: 500;
 }
 
 .tagline :deep(.wd-icon) {
-  color: #57a867;
+  color: $color-primary;
 }
 
 .search-box {
@@ -514,12 +509,12 @@ onLoad(() => {
   align-items: center;
   gap: 24rpx;
   border-radius: 40rpx;
-  background: #ffffff;
+  background: $color-surface;
   box-shadow: 0 16rpx 44rpx rgba(72, 96, 53, 0.09);
 }
 
 .search-box :deep(.search-icon) {
-  color: #57a867;
+  color: $color-primary;
 }
 
 .search-placeholder {
@@ -540,15 +535,22 @@ onLoad(() => {
   align-items: center;
   justify-content: center;
   gap: 24rpx;
-  color: #75806f;
+  color: $color-muted;
   font-size: 26rpx;
+}
+
+.skeleton-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 28rpx;
+  margin-top: 28rpx;
 }
 
 .retry-button {
   height: 64rpx;
   padding: 0 28rpx;
   border-radius: 999rpx;
-  background: #57a867;
+  background: $color-primary;
   color: #ffffff;
   font-size: 26rpx;
   font-weight: 700;
@@ -559,13 +561,8 @@ onLoad(() => {
   margin-top: 28rpx;
 }
 
-.combo-section {
-  gap: 20rpx;
-  margin-top: 28rpx;
-}
-
 .section-title {
-  color: #243127;
+  color: $color-text;
   font-size: 36rpx;
   font-weight: 700;
   line-height: 1.25;
@@ -577,7 +574,6 @@ onLoad(() => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16rpx;
-  border: 1rpx solid #efe8dc;
   border-radius: 36rpx;
   background: rgba(255, 255, 255, 0.8);
   box-shadow: 0 10rpx 28rpx rgba(0, 0, 0, 0.03);
@@ -594,6 +590,12 @@ onLoad(() => {
   font-size: 26rpx;
   font-weight: 600;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.chip:active {
+  opacity: 0.7;
+  transform: scale(0.96);
 }
 
 .chip-night {
@@ -626,68 +628,31 @@ onLoad(() => {
   color: #4d6e9e;
 }
 
-.combo-card {
-  height: 236rpx;
-  padding: 28rpx;
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  border-radius: 40rpx;
-  background: linear-gradient(90deg, #ecf8e5 0%, #fff4d8 100%);
-  box-shadow: 0 16rpx 36rpx rgba(73, 98, 63, 0.07);
-}
-
-.combo-copy {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.combo-title {
-  color: #243127;
-  font-size: 36rpx;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.combo-desc {
-  color: #75806f;
-  font-size: 24rpx;
-  font-weight: 500;
-  line-height: 1.35;
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.combo-button {
-  align-self: flex-start;
-  height: 64rpx;
-  padding: 0 24rpx;
-  display: flex;
-  align-items: center;
-  gap: 10rpx;
-  border: 1rpx solid #e5dfc9;
-  border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.85);
-  color: #57a867;
-  font-size: 26rpx;
-  font-weight: 700;
-}
-
-.combo-image {
-  width: 264rpx;
-  height: 212rpx;
-  flex: none;
-}
-
 .season-section {
   gap: 24rpx;
   margin-top: 28rpx;
   padding-bottom: 16rpx;
+}
+
+.season-section--cta {
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 10rpx 28rpx rgba(0, 0, 0, 0.03);
+}
+
+.season-cta-button {
+  height: 88rpx;
+  padding: 0 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  border-radius: 20rpx;
+  background: $color-primary;
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 600;
 }
 
 .season-title-row {
@@ -703,7 +668,7 @@ onLoad(() => {
 }
 
 .season-heading {
-  color: #243127;
+  color: $color-text;
   font-size: 38rpx;
   font-weight: 700;
   line-height: 1.25;
@@ -724,13 +689,13 @@ onLoad(() => {
   gap: 4rpx;
   border-radius: 999rpx;
   background: #e9f6e5;
-  color: #57a867;
+  color: $color-primary;
   font-size: 24rpx;
   font-weight: 600;
 }
 
 .season-desc {
-  color: #75806f;
+  color: $color-muted;
   font-size: 26rpx;
   line-height: 1.45;
 }
@@ -742,7 +707,6 @@ onLoad(() => {
   align-items: center;
   justify-content: space-between;
   gap: 18rpx;
-  border: 1rpx solid #e7e0d4;
   border-radius: 22rpx;
   background: rgba(255, 255, 255, 0.74);
 }
@@ -752,7 +716,7 @@ onLoad(() => {
   display: flex;
   align-items: center;
   gap: 10rpx;
-  color: #57a867;
+  color: $color-primary;
 }
 
 .season-location-copy .season-desc {
@@ -766,8 +730,11 @@ onLoad(() => {
   height: 52rpx;
   padding: 0 18rpx;
   flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999rpx;
-  background: #57a867;
+  background: $color-primary;
   color: #ffffff;
   font-size: 23rpx;
   font-weight: 700;
@@ -786,9 +753,8 @@ onLoad(() => {
   grid-template-columns: 108rpx minmax(0, 1fr);
   align-items: center;
   gap: 16rpx;
-  border: 1rpx solid #e7e0d4;
   border-radius: 24rpx;
-  background: #ffffff;
+  background: $color-surface;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
 }
 
@@ -803,7 +769,7 @@ onLoad(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #57a867;
+  color: $color-primary;
   font-size: 42rpx;
   font-weight: 700;
 }
@@ -817,7 +783,7 @@ onLoad(() => {
 
 .food-name {
   max-width: 100%;
-  color: #243127;
+  color: $color-text;
   font-size: 26rpx;
   font-weight: 700;
   line-height: 1.2;
@@ -832,7 +798,7 @@ onLoad(() => {
   padding: 4rpx 10rpx;
   border-radius: 999rpx;
   background: #e9f6e5;
-  color: #57a867;
+  color: $color-primary;
   font-size: 20rpx;
   font-weight: 700;
   line-height: 1.25;
@@ -842,7 +808,7 @@ onLoad(() => {
 }
 
 .food-reason {
-  color: #75806f;
+  color: $color-muted;
   font-size: 22rpx;
   line-height: 1.35;
   display: -webkit-box;
@@ -874,11 +840,11 @@ onLoad(() => {
   height: 70vh;
   min-height: 65vh;
   max-height: 75vh;
-  padding: 16rpx 32rpx 34rpx;
+  padding: 16rpx 32rpx 140rpx;
   display: flex;
   flex-direction: column;
   border-radius: 36rpx 36rpx 0 0;
-  background: #faf7f2;
+  background: $color-bg;
   box-sizing: border-box;
 }
 
@@ -905,14 +871,14 @@ onLoad(() => {
 }
 
 .popup-title {
-  color: #243127;
+  color: $color-text;
   font-size: 38rpx;
   font-weight: 700;
   line-height: 1.25;
 }
 
 .popup-subtitle {
-  color: #75806f;
+  color: $color-muted;
   font-size: 24rpx;
   line-height: 1.35;
 }
@@ -925,14 +891,15 @@ onLoad(() => {
   align-items: center;
   justify-content: center;
   border-radius: 999rpx;
-  background: #ffffff;
-  color: #75806f;
+  background: $color-surface;
+  color: $color-muted;
 }
 
 .popup-list {
   flex: 1;
   min-height: 0;
-  margin-top: 24rpx;
+  margin-top: 20rpx;
+  padding-bottom: 24rpx;
 }
 
 .popup-item {
@@ -943,9 +910,8 @@ onLoad(() => {
   grid-template-columns: 96rpx minmax(0, 1fr) 32rpx;
   align-items: center;
   gap: 18rpx;
-  border: 1rpx solid #e7e0d4;
   border-radius: 24rpx;
-  background: #ffffff;
+  background: $color-surface;
 }
 
 .popup-image {
@@ -959,7 +925,7 @@ onLoad(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #57a867;
+  color: $color-primary;
   font-size: 38rpx;
   font-weight: 700;
 }
@@ -972,7 +938,7 @@ onLoad(() => {
 }
 
 .popup-item-name {
-  color: #243127;
+  color: $color-text;
   font-size: 30rpx;
   font-weight: 700;
   line-height: 1.25;
@@ -984,7 +950,7 @@ onLoad(() => {
   padding: 4rpx 12rpx;
   border-radius: 999rpx;
   background: #e9f6e5;
-  color: #57a867;
+  color: $color-primary;
   font-size: 21rpx;
   font-weight: 700;
   line-height: 1.25;
@@ -994,7 +960,7 @@ onLoad(() => {
 }
 
 .popup-item-reason {
-  color: #75806f;
+  color: $color-muted;
   font-size: 24rpx;
   line-height: 1.35;
   display: -webkit-box;
@@ -1004,9 +970,20 @@ onLoad(() => {
 }
 
 .popup-disclaimer {
-  padding-top: 14rpx;
-  color: #9aa28f;
+  margin-top: 20rpx;
+  padding: 14rpx 18rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  border-radius: 16rpx;
+  background: rgba(87, 168, 103, 0.08);
+  color: #8a9a7e;
   font-size: 22rpx;
   line-height: 1.5;
+}
+
+.popup-disclaimer :deep(.wd-icon) {
+  color: $color-primary;
+  flex-shrink: 0;
 }
 </style>

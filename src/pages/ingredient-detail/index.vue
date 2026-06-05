@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShareAppMessage } from '@dcloudio/uni-app'
 import { getIngredientDetail } from '@/api/cloud'
 import type {
   IngredientDetail,
@@ -9,6 +9,7 @@ import type {
   PairingIngredient,
   KnowledgeSource
 } from '@/types/cloud'
+import { trackEvent } from '@/utils/analytics'
 
 interface NutritionFeature {
   title: string
@@ -237,13 +238,27 @@ function toggleSources() {
     return
   }
 
+  if (!showSources.value) {
+    trackEvent('detail_source_expand', { ingredientId: ingredientId.value })
+  }
   showSources.value = !showSources.value
 }
 
 onLoad((query) => {
   updateTopInset()
   ingredientId.value = String(query?.ingredientId || 'egg')
+  trackEvent('page_view', { page: 'detail', ingredientId: ingredientId.value })
   loadDetail()
+})
+
+onShareAppMessage(() => {
+  const name = detailData.value?.ingredient?.name || '食材'
+  const sharePath = `/pages/ingredient-detail/index?ingredientId=${encodeURIComponent(ingredientId.value)}`
+  trackEvent('detail_share', { ingredientId: ingredientId.value, ingredientName: name })
+  return {
+    title: `${name} - 食材小查`,
+    path: sharePath
+  }
 })
 </script>
 
@@ -415,8 +430,8 @@ onLoad((query) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #faf7f2;
-  color: #243127;
+  background: $color-bg;
+  color: $color-text;
 }
 
 .app-content {
@@ -451,11 +466,11 @@ onLoad((query) => {
   border: 2rpx solid #ece4d7;
   border-radius: 999rpx;
   background: rgba(255, 255, 255, 0.67);
-  color: #243127;
+  color: $color-text;
 }
 
 .nav-title {
-  color: #243127;
+  color: $color-text;
   font-size: 30rpx;
   font-weight: 700;
   line-height: 1.2;
@@ -483,14 +498,14 @@ onLoad((query) => {
 }
 
 .ingredient-name {
-  color: #243127;
+  color: $color-text;
   font-size: 60rpx;
   font-weight: 800;
   line-height: 1.1;
 }
 
 .ingredient-desc {
-  color: #75806f;
+  color: $color-muted;
   font-size: 26rpx;
   font-weight: 500;
   line-height: 1.35;
@@ -502,7 +517,7 @@ onLoad((query) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #75806f;
+  color: $color-muted;
   font-size: 26rpx;
   font-weight: 500;
 }
@@ -520,7 +535,7 @@ onLoad((query) => {
   align-items: center;
   justify-content: center;
   border-radius: 999rpx;
-  background: #57a867;
+  background: $color-primary;
   color: #ffffff;
   font-size: 26rpx;
   font-weight: 700;
@@ -528,7 +543,6 @@ onLoad((query) => {
 
 .empty-panel {
   min-height: 104rpx;
-  border: 2rpx solid #efe8dc;
   border-radius: 28rpx;
   background: rgba(255, 255, 255, 0.56);
 }
@@ -560,14 +574,14 @@ onLoad((query) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #57a867;
+  color: $color-primary;
   font-size: 72rpx;
   font-weight: 800;
 }
 
 .egg {
   position: absolute;
-  border: 2rpx solid #ffffff;
+  border: 2rpx solid $color-surface;
   border-radius: 50%;
 }
 
@@ -608,7 +622,7 @@ onLoad((query) => {
 }
 
 .section-title {
-  color: #243127;
+  color: $color-text;
   font-size: 34rpx;
   font-weight: 800;
   line-height: 1.2;
@@ -619,9 +633,8 @@ onLoad((query) => {
   display: flex;
   flex-direction: column;
   gap: 16rpx;
-  border: 2rpx solid #efe8dc;
   border-radius: 36rpx;
-  background: #ffffff;
+  background: $color-surface;
   box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.03);
 }
 
@@ -693,7 +706,7 @@ onLoad((query) => {
   align-items: center;
   justify-content: center;
   gap: 14rpx;
-  border: 2rpx solid #ffffff;
+  border: 2rpx solid $color-surface;
   border-radius: 999rpx;
   font-size: 28rpx;
   font-weight: 700;
@@ -710,7 +723,7 @@ onLoad((query) => {
 }
 
 .condition-note {
-  color: #75806f;
+  color: $color-muted;
   font-size: 24rpx;
   font-weight: 500;
   line-height: 1.3;
@@ -732,7 +745,6 @@ onLoad((query) => {
   display: flex;
   align-items: center;
   gap: 20rpx;
-  border: 2rpx solid #efe5d8;
   border-radius: 28rpx;
   box-shadow: 0 4rpx 16rpx rgba(185, 169, 140, 0.12);
 }
@@ -760,7 +772,7 @@ onLoad((query) => {
   gap: 8rpx;
   border: 2rpx solid #efe5d8;
   border-radius: 28rpx;
-  background: #ffffff;
+  background: $color-surface;
 }
 
 .pairing-visual.stacked {
@@ -824,7 +836,7 @@ onLoad((query) => {
 .pairing-title {
   min-width: 0;
   flex: 1;
-  color: #243127;
+  color: $color-text;
   font-size: 30rpx;
   font-weight: 700;
   line-height: 1.18;
@@ -835,14 +847,14 @@ onLoad((query) => {
   padding: 6rpx 14rpx;
   border-radius: 999rpx;
   background: #fff4d8;
-  color: #75806f;
+  color: $color-muted;
   font-size: 22rpx;
   font-weight: 600;
   line-height: 1.1;
 }
 
 .pairing-desc {
-  color: #75806f;
+  color: $color-muted;
   font-size: 22rpx;
   line-height: 1.32;
 }
@@ -852,7 +864,6 @@ onLoad((query) => {
   display: flex;
   flex-direction: column;
   gap: 14rpx;
-  border: 2rpx solid #f1dfc1;
   border-radius: 36rpx;
   background: #fff4de;
 }
@@ -887,7 +898,7 @@ onLoad((query) => {
 
 .source-action,
 .source-link :deep(.wd-icon) {
-  color: #57a867;
+  color: $color-primary;
   font-weight: 700;
 }
 
@@ -897,13 +908,12 @@ onLoad((query) => {
   display: flex;
   flex-direction: column;
   gap: 16rpx;
-  border: 2rpx solid #efe8dc;
   border-radius: 28rpx;
-  background: #ffffff;
+  background: $color-surface;
 }
 
 .source-panel-title {
-  color: #243127;
+  color: $color-text;
   font-size: 28rpx;
   font-weight: 800;
   line-height: 1.2;
@@ -916,13 +926,13 @@ onLoad((query) => {
 }
 
 .source-name {
-  color: #243127;
+  color: $color-text;
   font-size: 24rpx;
   font-weight: 700;
 }
 
 .source-meta {
-  color: #75806f;
+  color: $color-muted;
   font-size: 22rpx;
   line-height: 1.3;
 }

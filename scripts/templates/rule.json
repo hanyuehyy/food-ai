@@ -1,0 +1,15 @@
+{
+  "ruleId": "rule_{conditionId}_{ingredientId}",
+  "conditionId": "",
+  "ingredientId": "",
+  "recommendLevel": "",
+  "reason": "",
+  "score": 0,
+  "tags": [],
+  "cautionText": "",
+  "sourceIds": ["source_dietary_guidelines_2022", "source_cn_food_composition"],
+  "status": "published",
+  "dataVersion": "v1.0.0",
+  "createdBy": "manual",
+  "sortOrder": 0
+}

@@ -6,7 +6,10 @@
     "dev:mp-weixin": "uni build -p mp-weixin --outDir dist/dev/mp-weixin",
     "build:mp-weixin": "uni build -p mp-weixin",
     "extract:cloud-data": "node scripts/extract-cloud-init-data.mjs",
-    "type-check": "vue-tsc --noEmit"
+    "type-check": "vue-tsc --noEmit",
+    "test": "jest",
+    "test:e2e": "jest --config jest.e2e.config.js --runInBand --forceExit",
+    "test:all": "npm test && npm run test:e2e"
   },
   "dependencies": {
     "@dcloudio/uni-app": "vue3",
@@ -21,6 +24,8 @@
     "@dcloudio/types": "latest",
     "@dcloudio/uni-cli-shared": "vue3",
     "@dcloudio/vite-plugin-uni": "vue3",
+    "jest": "^30.4.2",
+    "miniprogram-automator": "^0.12.1",
     "sass": "^1.83.4",
     "typescript": "^5.7.3",
     "vite": "8.0.13",

@@ -1,0 +1,16 @@
+{
+  "collectionName": "ingredients",
+  "mode": "upsert",
+  "data": [
+    {"ingredientId": "white_mushroom", "pairingIds": ["pairing_white_mushroom_chicken"]},
+    {"ingredientId": "oyster_mushroom", "pairingIds": ["pairing_oyster_mushroom_tofu"]},
+    {"ingredientId": "cordyceps_flower", "pairingIds": ["pairing_cordyceps_flower_ribs"]},
+    {"ingredientId": "white_beech_mushroom", "pairingIds": ["pairing_white_beech_mushroom_shrimp"]},
+    {"ingredientId": "phoenix_oyster_mushroom", "pairingIds": ["pairing_phoenix_oyster_mushroom_greens"]},
+    {"ingredientId": "tea_tree_mushroom", "pairingIds": ["pairing_tea_tree_mushroom_chicken"]},
+    {"ingredientId": "bamboo_fungus", "pairingIds": ["pairing_bamboo_fungus_ribs"]},
+    {"ingredientId": "zucchini", "pairingIds": ["pairing_zucchini_egg"]},
+    {"ingredientId": "eggplant", "pairingIds": ["pairing_eggplant_garlic"]},
+    {"ingredientId": "chayote", "pairingIds": ["pairing_chayote_pork"]}
+  ]
+}

@@ -110,9 +110,14 @@ export interface HomeData {
   }
 }
 
+export interface IngredientCategoriesData {
+  categories: string[]
+}
+
 export interface IngredientListQuery {
   keyword?: string
   category?: string
+  conditionId?: string
   page?: number
   pageSize?: number
 }
@@ -132,4 +137,15 @@ export interface IngredientDetailData {
   conditions: HomeCondition[]
   pairings: IngredientPairingDetail[]
   sources: KnowledgeSource[]
+}
+
+export interface AnalyticsEvent {
+  eventType: string
+  page?: string
+  params?: Record<string, unknown>
+  timestamp?: number
+}
+
+export interface LogAnalyticsEventData {
+  inserted: number
 }

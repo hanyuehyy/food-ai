@@ -1,0 +1,33 @@
+{
+  "nutritionTags": [
+    "protein_rich", "plant_protein", "fiber_source", "vitamin_c_source",
+    "iron_source", "calcium_source", "staple_food", "light_hydrating",
+    "whole_grain", "fruit", "vegetable"
+  ],
+  "sceneTags": [
+    "breakfast_friendly", "dinner_light", "easy_to_cook", "snack_friendly",
+    "soup_friendly", "salad_friendly", "porridge_friendly"
+  ],
+  "riskTags": [
+    "allergy_risk", "high_energy", "sugar_attention",
+    "digestion_sensitive", "cooking_risk", "portion_control"
+  ],
+  "conditions": [
+    {"id": "stay_up_late", "name": "熬夜后", "needs": "蛋白质、维C、B族、水分、钾"},
+    {"id": "poor_sleep", "name": "睡不好", "needs": "蛋白质、钙、镁、适量碳水"},
+    {"id": "tired", "name": "容易疲惫", "needs": "蛋白质、铁、B族、碳水、维C"},
+    {"id": "low_appetite", "name": "没胃口", "needs": "适量碳水、蛋白质、水分、维C"},
+    {"id": "constipation", "name": "排便不顺", "needs": "膳食纤维、水分、钾、全谷物"},
+    {"id": "qi_blood_weak_feeling", "name": "气血不足感", "needs": "蛋白质、铁、维C、B族"},
+    {"id": "dry_mouth_heat", "name": "口干上火感", "needs": "水分、维C、钾、膳食纤维"},
+    {"id": "sugar_control", "name": "控糖关注", "needs": "膳食纤维、蛋白质、低油低糖、全谷物"}
+  ],
+  "categories": ["蔬菜", "蛋类", "奶类", "豆制品", "主食杂粮", "肉禽", "鱼类", "虾类", "水果", "坚果"],
+  "subCategories": ["叶菜类", "根茎类", "瓜茄类", "竹笋类", "花菜类", "茄果类", "菌菇类", "水生蔬菜类"],
+  "recommendLevels": {
+    "high": {"score": "86-92", "desc": "优先推荐"},
+    "medium": {"score": "68-86", "desc": "可以搭配"},
+    "low": {"score": "55-65", "desc": "可选食材"},
+    "caution": {"score": "<60", "desc": "谨慎选择"}
+  }
+}

@@ -4,5 +4,6 @@ export const CLOUD_FUNCTIONS = {
   getHomeData: 'getHomeData',
   getIngredientList: 'getIngredientList',
   getIngredientDetail: 'getIngredientDetail',
-  importKnowledgeData: 'importKnowledgeData'
+  getIngredientCategories: 'getIngredientCategories',
+  logAnalyticsEvent: 'logAnalyticsEvent'
 } as const

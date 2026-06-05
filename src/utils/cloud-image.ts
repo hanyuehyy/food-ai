@@ -17,7 +17,7 @@ function normalizeCloudFileId(fileId: string) {
 }
 
 function resolveCloudFileId(item: CloudImageItem) {
-  const sources = [item.imageFileId, item.imageUrl]
+  const sources = [item.imageUrl, item.imageFileId]
 
   for (const source of sources) {
     const fileId = normalizeCloudFileId(source || '')
@@ -42,18 +42,24 @@ function resolveDirectSource(item: CloudImageItem) {
   return ''
 }
 
-function resolveDirectSourceMap<T extends CloudImageItem>(list: T[]) {
-  return list.reduce<Record<string, string>>((map, item) => {
-    const directSource = resolveDirectSource(item)
-    if (directSource) {
-      map[item.ingredientId] = directSource
-    }
-    return map
-  }, {})
-}
-
 export async function resolveCloudImageSources<T extends CloudImageItem>(list: T[]) {
-  const cloudSourceMap = list.reduce<Record<string, string>>((map, item) => {
+  const directMap: Record<string, string> = {}
+  const unresolved: T[] = []
+
+  for (const item of list) {
+    const direct = resolveDirectSource(item)
+    if (direct) {
+      directMap[item.ingredientId] = direct
+    } else {
+      unresolved.push(item)
+    }
+  }
+
+  if (!unresolved.length) {
+    return directMap
+  }
+
+  const cloudSourceMap = unresolved.reduce<Record<string, string>>((map, item) => {
     const fileId = resolveCloudFileId(item)
     if (fileId) {
       map[item.ingredientId] = fileId
@@ -64,18 +70,19 @@ export async function resolveCloudImageSources<T extends CloudImageItem>(list: T
   const cloudFileIds = [...new Set(Object.values(cloudSourceMap))]
 
   if (!cloudFileIds.length) {
-    return resolveDirectSourceMap(list)
+    return directMap
   }
 
   try {
     const cloud = wx.cloud
     if (!cloud?.getTempFileURL) {
-      return resolveDirectSourceMap(list)
+      return directMap
     }
 
     const res = await cloud.getTempFileURL({
       fileList: cloudFileIds
     })
+
     const tempUrlMap = res.fileList.reduce<Record<string, string>>((map, file, index) => {
       if (file.status === 0 && file.tempFileURL) {
         map[file.fileID || cloudFileIds[index]] = file.tempFileURL
@@ -84,23 +91,17 @@ export async function resolveCloudImageSources<T extends CloudImageItem>(list: T
       return map
     }, {})
 
-    return list.reduce<Record<string, string>>((map, item) => {
-      const directSource = resolveDirectSource(item)
+    for (const item of unresolved) {
       const cloudSource = cloudSourceMap[item.ingredientId] || ''
-      const resolvedSource = directSource || tempUrlMap[cloudSource] || ''
-      if (resolvedSource) {
-        map[item.ingredientId] = resolvedSource
+      const resolved = tempUrlMap[cloudSource]
+      if (resolved) {
+        directMap[item.ingredientId] = resolved
       }
-      return map
-    }, {})
+    }
+
+    return directMap
   } catch (error) {
     console.warn('[cloud-image] resolve temp urls failed', error)
-    return list.reduce<Record<string, string>>((map, item) => {
-      const directSource = resolveDirectSource(item)
-      if (directSource) {
-        map[item.ingredientId] = directSource
-      }
-      return map
-    }, {})
+    return directMap
   }
 }
