@@ -11,6 +11,33 @@
 - 🍽️ **食材搭配** - 查看最佳食材搭配方案
 - 📖 **知识来源** - 查看食材信息的权威来源
 
+## 📱 项目截图
+
+<div align="center">
+
+**首页**
+<br>
+
+![首页](docs/images/home.png)
+
+<br>
+
+**食材库**
+<br>
+
+![食材库](docs/images/ingredient-library.png)
+
+<br>
+
+**食材详情页**
+<br>
+
+![食材详情](docs/images/ingredient-detail-top.png)
+
+![食材详情-搭配推荐](docs/images/ingredient-detail-bottom.png)
+
+</div>
+
 ## 🛠️ 技术栈
 
 - **前端框架**: uni-app CLI + Vue 3 + TypeScript + Vite

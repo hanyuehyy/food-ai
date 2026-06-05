@@ -20,6 +20,8 @@ design-reference/
 *.zip
 *.mp4
 *.mov
+
+# 图片文件（本地）
 *.png
 *.jpg
 *.jpeg
@@ -27,8 +29,12 @@ design-reference/
 *.gif
 *.ico
 
+# 例外：README 截图
+!docs/
+docs/*
+!docs/images/
+
 # 文档（本地）
-docs/
 data/
 
 # 备份和归档
