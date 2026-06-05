@@ -18,23 +18,22 @@
 **首页**
 <br>
 
-![首页](docs/images/home.png)
+<img src="docs/images/home.png" width="300">
 
 <br>
 
 **食材库**
 <br>
 
-![食材库](docs/images/ingredient-library.png)
+<img src="docs/images/ingredient-library.png" width="300">
 
 <br>
 
 **食材详情页**
 <br>
 
-![食材详情](docs/images/ingredient-detail-top.png)
-
-![食材详情-搭配推荐](docs/images/ingredient-detail-bottom.png)
+<img src="docs/images/ingredient-detail-top.png" width="300">
+<img src="docs/images/ingredient-detail-bottom.png" width="300">
 
 </div>
 
